@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSolutions Inc. - Ultra Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --background-color: #ecf0f1;
+            --text-color: #333;
+            --widget-background: #fff;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        #app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        nav {
+            width: 250px;
+            background-color: rgba(44, 62, 80, 0.9);
+            padding: 2rem 0;
+            color: white;
+            backdrop-filter: blur(10px);
+            transition: width 0.3s ease;
+        }
+
+        nav.collapsed {
+            width: 60px;
+        }
+
+        nav ul {
+            list-style-type: none;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+        }
+
+        nav ul li a i {
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        nav.collapsed ul li a span {
+            display: none;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .widget {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .widget h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+
+        .task-list, .project-list, .team-list {
+            list-style-type: none;
+        }
+
+        .task-list li, .project-list li, .team-list li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background-color: rgba(248, 249, 250, 0.8);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .task-list li:hover, .project-list li:hover, .team-list li:hover {
+            background-color: rgba(248, 249, 250, 1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #voice-command-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        #voice-command-btn:hover {
+            background-color: #c0392b;
+            transform: scale(1.1);
+        }
+
+        #ai-assistant {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+        }
+
+        #ai-assistant h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        #ai-message {
+            margin-bottom: 0.5rem;
+        }
+
+        #ai-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-content label {
+            margin-top: 1rem;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal-content button[type="submit"] {
+            margin-top: 1rem;
+        }
+
+        .close-modal {
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            #app {
+                flex-direction: column;
+            }
+
+            nav {
+                width: 100%;
+                padding: 1rem 0;
+            }
+
+            nav ul {
+                display: flex;
+                justify-content: space-around;
+            }
+
+            nav ul li a {
+                padding: 0.5rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <nav id="main-nav">
+            <ul>
+                <li><a href="#dashboard" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li><a href="#tasks"><i class="fas fa-tasks"></i> <span>Tasks</span></a></li>
+                <li><a href="#projects"><i class="fas fa-project-diagram"></i> <span>Projects</span></a></li>
+                <li><a href="#team"><i class="fas fa-users"></i> <span>Team</span></a></li>
+                <li><a href="#analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></a></li>
+                <li><a href="#settings"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+            </ul>
+        </nav>
+        <main>
+            <header>
+                <h1>TechSolutions Inc.</h1>
+                <div class="user-info">
+                    <img src="https://img.icons8.com/?size=48&id=23280&format=png" alt="User Avatar">
+                    <span id="user-name">Admin User</span>
+                </div>
+            </header>
+            <div id="content">
+                <section id="dashboard">
+                    <div class="dashboard-grid">
+                        <div class="widget">
+                            <h3>Task Overview</h3>
+                            <canvas id="task-chart"></canvas>
+                        </div>
+                        <div class="widget">
+                            <h3>Recent Activities</h3>
+                            <ul id="activity-list"></ul>
+                        </div>
+                        <div class="widget">
+                            <h3>Project Progress</h3>
+                            <canvas id="project-chart"></canvas>
+                        </div>
+                        <div class="widget">
+                            <h3>Quick Actions</h3>
+                            <a href="#" class="btn" id="add-task-btn">Add New Task</a>
+                            <a href="#" class="btn" id="add-project-btn">Add New Project</a>
+                            <a href="#" class="btn" id="add-team-member-btn">Add Team Member</a>
+                        </div>
+                        <div class="widget">
+                            <h3>AI-Powered Insights</h3>
+                            <div id="ai-insights"></div>
+                        </div>
+                        <div class="widget">
+                            <h3>Team Performance</h3>
+                            <canvas id="team-performance-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+                <section id="tasks" class="hidden">
+                    <h2>Tasks</h2>
+                    <div id="task-filters">
+                        <select id="task-status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <select id="task-priority-filter">
+                            <option value="all">All Priorities</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                        <input type="text" id="task-search" placeholder="Search tasks...">
+                    </div>
+                    <ul id="task-list" class="task-list"></ul>
+                    <button id="add-task-btn-2" class="btn">Add New Task</button>
+                </section>
+                <section id="projects" class="hidden">
+                    <h2>Projects</h2>
+                    <div id="project-filters">
+                        <select id="project-status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <input type="text" id="project-search" placeholder="Search projects...">
+                    </div>
+                    <ul id="project-list" class="project-list"></ul>
+                    <button id="add-project-btn-2" class="btn">Add New Project</button>
+                </section>
+                <section id="team" class="hidden">
+                    <h2>Team</h2>
+                    <div id="team-filters">
+                        <select id="team-role-filter">
+                            <option value="all">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                        <input type="text" id="team-search" placeholder="Search team members...">
+                    </div>
+                    <ul id="team-list" class="team-list"></ul>
+                    <button id="add-team-member-btn-2" class="btn">Add Team Member</button>
+                </section>
+                <section id="analytics" class="hidden">
+                    <h2>Analytics</h2>
+                    <div class="dashboard-grid">
+                        <div class="widget">
+                            <h3>Productivity Trends</h3>
+                            <canvas id="productivity-chart"></canvas>
+                        </div>
+                        <div class="widget">
+                            <h3>Resource Allocation</h3>
+                            
+                            <canvas id="resource-allocation-chart"></canvas>
+                        </div>
+                        <div class="widget">
+                            <h3>Project Timeline</h3>
+                            <div id="project-timeline"></div>
+                        </div>
+                    </div>
+                </section>
+                <section id="settings" class="hidden">
+                    <h2>Settings</h2>
+                    <div class="dashboard-grid">
+                        <div class="widget">
+                            <h3>User Preferences</h3>
+                            <form id="user-preferences-form">
+                                <label for="theme-select">Theme:</label>
+                                <select id="theme-select">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto (System)</option>
+                                </select>
+                                <label for="notification-toggle">Enable Notifications:</label>
+                                <input type="checkbox" id="notification-toggle" checked>
+                                <button type="submit" class="btn">Save Preferences</button>
+                            </form>
+                        </div>
+                        <div class="widget">
+                            <h3>Account Settings</h3>
+                            <form id="account-settings-form">
+                                <label for="user-email">Email:</label>
+                                <input type="email" id="user-email" value="admin@techsolutions.com">
+                                <label for="user-password">New Password:</label>
+                                <input type="password" id="user-password">
+                                <button type="submit" class="btn">Update Account</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <div id="voice-command-btn">
+        <i class="fas fa-microphone"></i>
+    </div>
+    <div id="ai-assistant" class="hidden">
+        <h3>AI Assistant</h3>
+        <p id="ai-message"></p>
+        <div id="ai-actions">
+            <button class="btn" id="ai-action-yes">Yes</button>
+            <button class="btn" id="ai-action-no">No</button>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Load JSON data
+        let data = {
+            "users": [
+                {
+                    "id": 1,
+                    "username": "admin",
+                    "password": "admin123",
+                    "role": "admin",
+                    "name": "Admin User",
+                    "avatar": "https://img.icons8.com/?size=48&id=23280&format=png"
+                },
+                {
+                    "id": 2,
+                    "username": "employee",
+                    "password": "emp123",
+                    "role": "employee",
+                    "name": "John Doe",
+                    "avatar": "https://img.icons8.com/?size=40&id=23461&format=png"
+                },
+                {
+                    "id": 3,
+                    "username": "employee2",
+                    "password": "emp456",
+                    "role": "employee",
+                    "name": "Jane Smith",
+                    "avatar": "https://img.icons8.com/?size=48&id=23347&format=png"
+                }
+            ],
+            "tasks": [
+                {
+                    "id": 1,
+                    "title": "Complete project proposal",
+                    "assignee": 2,
+                    "status": "In Progress",
+                    "dueDate": "2023-06-30",
+                    "priority": "High"
+                },
+                {
+                    "id": 2,
+                    "title": "Review code changes",
+                    "assignee": 2,
+                    "status": "Pending",
+                    "dueDate": "2023-07-05",
+                    "priority": "Medium"
+                },
+                {
+                    "id": 3,
+                    "title": "Update documentation",
+                    "assignee": 2,
+                    "status": "Completed",
+                    "dueDate": "2023-06-25",
+                    "priority": "Low"
+                },
+                {
+                    "id": 4,
+                    "title": "Prepare presentation",
+                    "assignee": 3,
+                    "status": "In Progress",
+                    "dueDate": "2023-07-10",
+                    "priority": "High"
+                },
+                {
+                    "id": 5,
+                    "title": "Client meeting",
+                    "assignee": 3,
+                    "status": "Pending",
+                    "dueDate": "2023-07-15",
+                    "priority": "Medium"
+                }
+            ],
+            "projects": [
+                {
+                    "id": 1,
+                    "name": "Website Redesign",
+                    "status": "In Progress",
+                    "completion": 65
+                },
+                {
+                    "id": 2,
+                    "name": "Mobile App Development",
+                    "status": "Pending",
+                    "completion": 30
+                },
+                {
+                    "id": 3,
+                    "name": "Database Migration",
+                    "status": "Completed",
+                    "completion": 100
+                }
+            ],
+            "activities": [
+                {
+                    "id": 1,
+                    "user": "John Doe",
+                    "action": "completed",
+                    "item": "Update documentation",
+                    "timestamp": "2023-06-25 14:30"
+                },
+                {
+                    "id": 2,
+                    "user": "Jane Smith",
+                    "action": "created",
+                    "item": "Client meeting",
+                    "timestamp": "2023-06-26 09:15"
+                },
+                {
+                    "id": 3,
+                    "user": "Admin User",
+                    "action": "updated",
+                    "item": "Website Redesign project",
+                    "timestamp": "2023-06-26 11:45"
+                }
+            ]
+        };
+
+        // Navigation
+        const navLinks = document.querySelectorAll('nav a');
+        const sections = document.querySelectorAll('main section');
+        const mainNav = document.getElementById('main-nav');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                sections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                document.getElementById(targetId).classList.remove('hidden');
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Animate section entrance
+                gsap.from(`#${targetId}`, {opacity: 0, y: 20, duration: 0.5, ease: "power2.out"});
+            });
+        });
+
+        // Collapsible sidebar
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleNav = () => {
+                mainNav.classList.toggle('collapsed');
+                document.querySelector('main').style.marginLeft = mainNav.classList.contains('collapsed') ? '60px' : '250px';
+            };
+
+            mainNav.addEventListener('mouseenter', () => {
+                if (mainNav.classList.contains('collapsed')) {
+                    toggleNav();
+                }
+            });
+
+            mainNav.addEventListener('mouseleave', () => {
+                if (!mainNav.classList.contains('collapsed')) {
+                    toggleNav();
+                }
+            });
+        });
+
+        // Task Chart
+        const taskCtx = document.getElementById('task-chart').getContext('2d');
+        let taskChart;
+
+        function updateTaskChart() {
+            const taskStatuses = data.tasks.reduce((acc, task) => {
+                acc[task.status] = (acc[task.status] || 0) + 1;
+                return acc;
+            }, {});
+
+            if (taskChart) {
+                taskChart.data.datasets[0].data = Object.values(taskStatuses);
+                taskChart.update();
+            } else {
+                taskChart = new Chart(taskCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(taskStatuses),
+                        datasets: [{
+                            data: Object.values(taskStatuses),
+                            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Task Status Distribution'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        updateTaskChart();
+
+        // Project Chart
+        const projectCtx = document.getElementById('project-chart').getContext('2d');
+        let projectChart;
+
+        function updateProjectChart() {
+            if (projectChart) {
+                projectChart.data.labels = data.projects.map(project => project.name);
+                projectChart.data.datasets[0].data = data.projects.map(project => project.completion);
+                projectChart.update();
+            } else {
+                projectChart = new Chart(projectCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.projects.map(project => project.name),
+                        datasets: [{
+                            label: 'Completion Percentage',
+                            data: data.projects.map(project => project.completion),
+                            backgroundColor: '#3498db'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Project Completion'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        updateProjectChart();
+
+        // Team Performance Chart
+        const teamCtx = document.getElementById('team-performance-chart').getContext('2d');
+        new Chart(teamCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Productivity', 'Collaboration', 'Innovation', 'Quality', 'Timeliness'],
+                datasets: [
+                    {
+                        label: 'Team A',
+                        data: [80, 90, 75, 85, 95],
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(54, 162, 235)'
+                    },
+                    {
+                        label: 'Team B',
+                        data: [70, 85, 80, 75, 90],
+                        fill: true,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(255, 99, 132)'
+                    }
+                ]
+            },
+            options: {
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Team Performance Comparison'
+                    }
+                }
+            }
+        });
+
+        // Populate Recent Activities
+        const activityList = document.getElementById('activity-list');
+        function updateActivities() {
+            activityList.innerHTML = '';
+            data.activities.forEach(activity => {
+                const li = document.createElement('li');
+                li.textContent = `${activity.user} ${activity.action} ${activity.item} on ${activity.timestamp}`;
+                activityList.appendChild(li);
+            });
+        }
+        updateActivities();
+
+        // Populate Tasks
+        const taskList = document.getElementById('task-list');
+        const renderTasks = (tasks) => {
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${task.title}</strong> - ${task.status} (Due: ${task.dueDate})
+                    <br>
+                    <span class="task-priority ${task.priority.toLowerCase()}">${task.priority} Priority</span>
+                    <span class="task-assignee">Assigned to: ${data.users.find(user => user.id === task.assignee).name}</span>
+                `;
+                taskList.appendChild(li);
+            });
+        };
+
+        renderTasks(data.tasks);
+
+        // Task Filters
+        const taskStatusFilter = document.getElementById('task-status-filter');
+        const taskPriorityFilter = document.getElementById('task-priority-filter');
+        const taskSearch = document.getElementById('task-search');
+
+        const filterTasks = () => {
+            const statusFilter = taskStatusFilter.value;
+            const priorityFilter = taskPriorityFilter.value;
+            const searchFilter = taskSearch.value.toLowerCase();
+
+            const filteredTasks = data.tasks.filter(task => {
+                const statusMatch = statusFilter === 'all' || task.status.toLowerCase() === statusFilter;
+                const priorityMatch = priorityFilter === 'all' || task.priority.toLowerCase() === priorityFilter;
+                const searchMatch = task.title.toLowerCase().includes(searchFilter) ||
+                                    task.status.toLowerCase().includes(searchFilter) ||
+                                    task.priority.toLowerCase().includes(searchFilter);
+                return statusMatch && priorityMatch && searchMatch;
+            });
+
+            renderTasks(filteredTasks);
+        };
+
+        taskStatusFilter.addEventListener('change', filterTasks);
+        taskPriorityFilter.addEventListener('change', filterTasks);
+        taskSearch.addEventListener('input', filterTasks);
+
+        // Populate Projects
+        const projectList = document.getElementById('project-list');
+        const renderProjects = (projects) => {
+            projectList.innerHTML = '';
+            projects.forEach(project => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${project.name}</strong> - ${project.status}
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${project.completion}%"></div>
+                    </div>
+                    <span class="completion-percentage">${project.completion}% Complete</span>
+                `;
+                projectList.appendChild(li);
+            });
+        };
+
+        renderProjects(data.projects);
+
+        // Project Filters
+        const projectStatusFilter = document.getElementById('project-status-filter');
+        const projectSearch = document.getElementById('project-search');
+
+        const filterProjects = () => {
+            const statusFilter = projectStatusFilter.value;
+            const searchFilter = projectSearch.value.toLowerCase();
+
+            const filteredProjects = data.projects.filter(project => {
+                const statusMatch = statusFilter === 'all' || project.status.toLowerCase() === statusFilter;
+                const searchMatch = project.name.toLowerCase().includes(searchFilter) ||
+                                    project.status.toLowerCase().includes(searchFilter);
+                return statusMatch && searchMatch;
+            });
+
+            renderProjects(filteredProjects);
+        };
+
+        projectStatusFilter.addEventListener('change', filterProjects);
+        projectSearch.addEventListener('input', filterProjects);
+
+        // Populate Team
+        const teamList = document.getElementById('team-list');
+        const renderTeam = (users) => {
+            teamList.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <img src="${user.avatar}" alt="${user.name}" class="team-avatar">
+                    <strong>${user.name}</strong> (${user.role})
+                `;
+                teamList.appendChild(li);
+            });
+        };
+
+        renderTeam(data.users);
+
+        // Team Filters
+        const teamRoleFilter = document.getElementById('team-role-filter');
+        const teamSearch = document.getElementById('team-search');
+
+        const filterTeam = () => {
+            const roleFilter = teamRoleFilter.value;
+            const searchFilter = teamSearch.value.toLowerCase();
+
+            const filteredUsers = data.users.filter(user => {
+                const roleMatch = roleFilter === 'all' || user.role.toLowerCase() === roleFilter;
+                const searchMatch = user.name.toLowerCase().includes(searchFilter) ||
+                                    user.role.toLowerCase().includes(searchFilter);
+                return roleMatch && searchMatch;
+            });
+
+            renderTeam(filteredUsers);
+        };
+
+        teamRoleFilter.addEventListener('change', filterTeam);
+        teamSearch.addEventListener('input', filterTeam);
+
+        // Analytics Charts
+        const productivityCtx = document.getElementById('productivity-chart').getContext('2d');
+        new Chart(productivityCtx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Productivity Score',
+                    data: [75, 82, 78, 90],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Team Productivity Trends'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        const resourceCtx = document.getElementById('resource-allocation-chart').getContext('2d');
+        new Chart(resourceCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Development', 'Design', 'Marketing', 'Management'],
+                datasets: [{
+                    data: [40, 20, 25, 15],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206,86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Resource Allocation'
+                    }
+                }
+            }
+        });
+
+        // Quick Action Buttons
+        document.getElementById('add-task-btn').addEventListener('click', showAddTaskModal);
+        document.getElementById('add-task-btn-2').addEventListener('click', showAddTaskModal);
+
+        document.getElementById('add-project-btn').addEventListener('click', showAddProjectModal);
+        document.getElementById('add-project-btn-2').addEventListener('click', showAddProjectModal);
+
+        document.getElementById('add-team-member-btn').addEventListener('click', showAddTeamMemberModal);
+        document.getElementById('add-team-member-btn-2').addEventListener('click', showAddTeamMemberModal);
+
+        function showAddTaskModal() {
+            showModal('Add New Task', `
+                <form id="add-task-form">
+                    <label for="task-title">Title:</label>
+                    <input type="text" id="task-title" required>
+                    <label for="task-assignee">Assignee:</label>
+                    <select id="task-assignee">
+                        ${data.users.map(user => `<option value="${user.id}">${user.name}</option>`).join('')}
+                    </select>
+                    <label for="task-status">Status:</label>
+                    <select id="task-status">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <label for="task-due-date">Due Date:</label>
+                    <input type="date" id="task-due-date" required>
+                    <label for="task-priority">Priority:</label>
+                    <select id="task-priority">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                    <button type="submit" class="btn">Add Task</button>
+                </form>
+            `);
+
+            document.getElementById('add-task-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newTask = {
+                    id: data.tasks.length + 1,
+                    title: document.getElementById('task-title').value,
+                    assignee: parseInt(document.getElementById('task-assignee').value),
+                    status: document.getElementById('task-status').value,
+                    dueDate: document.getElementById('task-due-date').value,
+                    priority: document.getElementById('task-priority').value
+                };
+                data.tasks.push(newTask);
+                renderTasks(data.tasks);
+                updateTaskChart();
+                closeModal();
+                showNotification('Task added successfully!');
+                
+                // Add new activity
+                addActivity(`Admin User added a new task: ${newTask.title}`);
+            });
+        }
+
+        function showAddProjectModal() {
+            showModal('Add New Project', `
+                <form id="add-project-form">
+                    <label for="project-name">Name:</label>
+                    <input type="text" id="project-name" required>
+                    <label for="project-status">Status:</label>
+                    <select id="project-status">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <label for="project-completion">Completion (%):</label>
+                    <input type="number" id="project-completion" min="0" max="100" required>
+                    <button type="submit" class="btn">Add Project</button>
+                </form>
+            `);
+
+            document.getElementById('add-project-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newProject = {
+                    id: data.projects.length + 1,
+                    name: document.getElementById('project-name').value,
+                    status: document.getElementById('project-status').value,
+                    completion: parseInt(document.getElementById('project-completion').value)
+                };
+                data.projects.push(newProject);
+                renderProjects(data.projects);
+                updateProjectChart();
+                closeModal();
+                showNotification('Project added successfully!');
+                
+                // Add new activity
+                addActivity(`Admin User added a new project: ${newProject.name}`);
+            });
+        }
+
+        function showAddTeamMemberModal() {
+            showModal('Add Team Member', `
+                <form id="add-team-member-form">
+                    <label for="team-member-name">Name:</label>
+                    <input type="text" id="team-member-name" required>
+                    <label for="team-member-username">Username:</label>
+                    <input type="text" id="team-member-username" required>
+                    <label for="team-member-password">Password:</label>
+                    <input type="password" id="team-member-password" required>
+                    <label for="team-member-role">Role:</label>
+                    <select id="team-member-role">
+                        <option value="employee">Employee</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button type="submit" class="btn">Add Team Member</button>
+                </form>
+            `);
+
+            document.getElementById('add-team-member-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newTeamMember = {
+                    id: data.users.length + 1,
+                    name: document.getElementById('team-member-name').value,
+                    username: document.getElementById('team-member-username').value,
+                    password: document.getElementById('team-member-password').value,
+                    role: document.getElementById('team-member-role').value,
+                    avatar: "https://img.icons8.com/?size=48&id=23280&format=png" // Default avatar
+                };
+                data.users.push(newTeamMember);
+                renderTeam(data.users);
+                closeModal();
+                showNotification('Team member added successfully!');
+                
+                // Add new activity
+                addActivity(`Admin User added a new team member: ${newTeamMember.name}`);
+            });
+        }
+
+        // Modal functionality
+        function showModal(title, content) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2>${title}</h2>
+                    ${content}
+                    <button class="btn close-modal">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.querySelector('.close-modal').addEventListener('click', closeModal);
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Notification functionality
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.opacity = 1;
+            setTimeout(() => {
+                notification.style.opacity = 0;
+            }, 3000);
+        }
+
+        // Voice Command functionality
+        const voiceCommandBtn = document.getElementById('voice-command-btn');
+        const aiAssistant = document.getElementById('ai-assistant');
+        const aiMessage = document.getElementById('ai-message');
+        const aiActionYes = document.getElementById('ai-action-yes');
+        const aiActionNo = document.getElementById('ai-action-no');
+
+        voiceCommandBtn.addEventListener('click', () => {
+            // Simulating voice recognition
+            setTimeout(() => {
+                aiAssistant.classList.remove('hidden');
+                aiMessage.textContent = "I heard you say 'Show me the latest tasks'. Would you like me to navigate to the Tasks section?";
+            }, 1000);
+        });
+
+        aiActionYes.addEventListener('click', () => {
+            document.querySelector('nav a[href="#tasks"]').click();
+            aiAssistant.classList.add('hidden');
+        });
+
+        aiActionNo.addEventListener('click', () => {
+            aiAssistant.classList.add('hidden');
+        });
+
+        // AI-Powered Insights
+        const aiInsights = document.getElementById('ai-insights');
+        const insights = [
+            "Based on current progress, Project A is likely to be completed 2 days ahead of schedule.",
+            "Team productivity has increased by 15% this week compared to last week.",
+            "There's a potential bottleneck in the design phase of Project B. Consider reallocating resources.",
+            "Employee John Doe has completed 95% of assigned tasks before deadlines this month."
+        ];
+
+        insights.forEach(insight => {
+            const p = document.createElement('p');
+            p.textContent = insight;
+            aiInsights.appendChild(p);
+        });
+
+        // Settings functionality
+        document.getElementById('user-preferences-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const theme = document.getElementById('theme-select').value;
+            const notifications = document.getElementById('notification-toggle').checked;
+            // Simulating saving preferences
+            showNotification('User preferences saved successfully!');
+        });
+
+        document.getElementById('account-settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('user-email').value;
+            const password = document.getElementById('user-password').value;
+            // Simulating updating account
+            showNotification('Account settings updated successfully!');
+        });
+
+        // Function to add new activity
+        function addActivity(activityDescription) {
+            const newActivity = {
+                id: data.activities.length + 1,
+                user: "Admin User",
+                action: "added",
+                item: activityDescription,
+                timestamp: new Date().toLocaleString()
+            };
+            data.activities.unshift(newActivity);
+            updateActivities();
+        }
+
+        // Initial animations
+        gsap.from("header", {opacity: 0, y: -50, duration: 1, ease: "power3.out"});
+        gsap.from(".widget", {opacity: 0, y: 50, duration: 1, stagger: 0.2, ease: "power3.out"});
+    </script>
+</body>
+</html>
